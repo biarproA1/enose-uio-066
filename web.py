@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit st
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
@@ -116,7 +116,7 @@ if tombol_uji:
         
     # Beautiful Data Analytics Breakdown with a bar chart
     st.write("---")
-    st.write("📈 **AI Probability Spectrum Distribution:**")
+    st.write("### 📈 AI Probability Spectrum Distribution")
     
     df_chart = pd.DataFrame({
         'VOC Compound': daftar_gas,
@@ -126,10 +126,21 @@ if tombol_uji:
     # Horizontal Bar Chart for better data visual aesthetics
     st.bar_chart(data=df_chart, x='VOC Compound', y='Similarity Probability (%)', horizontal=True, color="#2563EB")
     
-    # Clean Reference Table below the chart
-    with st.expander("👁️ View Full Detailed Data Table"):
-        df_prob = pd.DataFrame({
-            'VOC Compound Type': daftar_gas,
-            'Signal Match Rate': [f"{p*100:.2f}%" for p in probabilitas_semua]
-        }).sort_values(by='Signal Match Rate', ascending=False).reset_index(drop=True)
-        st.table(df_prob)
+    # NEW FEATURE: Structured Data Table shown directly to the user
+    st.write("### 📋 Detailed Signal Analysis Report")
+    
+    # Create and sort dataframe based on highest probability
+    df_prob = pd.DataFrame({
+        'VOC Compound Type': daftar_gas,
+        'Signal Match Rate': probabilitas_semua * 100
+    }).sort_values(by='Signal Match Rate', ascending=False).reset_index(drop=True)
+    
+    # Format to look like standard table percentages
+    df_prob['Signal Match Rate'] = df_prob['Signal Match Rate'].map("{:.2f}%".format)
+    
+    # Add a standard index counter starting from 1 instead of 0
+    df_prob.index = df_prob.index + 1
+    df_prob.index.name = 'No.'
+    
+    # Render the formal data table
+    st.table(df_prob)
