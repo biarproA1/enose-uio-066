@@ -3,40 +3,37 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 
-# 1. PAGE CONFIGURATION
+# 1. PAGE CONFIGURATION & THEME
 st.set_page_config(
-    page_title="E-Nose VOC & TB Diagnostic System",
+    page_title="E-Nose Medical Diagnostics",
     page_icon="🔬",
-    layout="centered"
+    layout="centered",
+    initial_sidebar_state="collapsed"
 )
+
+# Custom CSS to make the app look like a modern dashboard
+st.markdown("""
+<style>
+    .main { background-color: #f8f9fa; }
+    .stButton>button { width: 100%; border-radius: 8px; height: 3em; font-weight: bold; }
+    div[data-testid="stMetricValue"] { font-size: 28px; font-weight: bold; color: #1E3A8A; }
+    .reportview-container .main .block-container{ max-width: 650px; }
+</style>
+""", unsafe_allow_html=True)
 
 # 2. AI MODEL TRAINING (Single Sensor UiO-66 Only)
 @st.cache_resource
 def train_voc_model():
-    # Database original based on your dataset (UiO-66 values)
     raw_data = [
-        ["Methyl Nicotinate", "UiO66", 0.2, 3.29993],
-        ["Methyl Nicotinate", "UiO66", 1.0, 3.29967],
-        ["Methyl Nicotinate", "UiO66", 5.0, 3.29834],
-        ["Methyl Phenylacetate", "UiO66", 0.2, 3.29993],
-        ["Methyl Phenylacetate", "UiO66", 1.0, 3.29967],
-        ["Methyl Phenylacetate", "UiO66", 5.0, 3.29835],
-        ["Isoprene", "UiO66", 0.2, 3.29993],
-        ["Isoprene", "UiO66", 1.0, 3.29967],
-        ["Isoprene", "UiO66", 5.0, 3.29834],
-        ["1,2-Dimethylbenzene", "UiO66", 0.2, 3.29993],
-        ["1,2-Dimethylbenzene", "UiO66", 1.0, 3.29967],
-        ["1,2-Dimethylbenzene", "UiO66", 5.0, 3.29834],
-        ["2-Methylpyridine", "UiO66", 0.2, 3.29993],
-        ["2-Methylpyridine", "UiO66", 1.0, 3.29967],
-        ["2-Methylpyridine", "UiO66", 5.0, 3.29834],
-        ["Ethanol", "UiO66", 0.2, 3.29993],
-        ["Ethanol", "UiO66", 1.0, 3.29967],
-        ["Ethanol", "UiO66", 5.0, 3.29822]
+        ["Methyl Nicotinate", 3.29993], ["Methyl Nicotinate", 3.29967], ["Methyl Nicotinate", 3.29834],
+        ["Methyl Phenylacetate", 3.29993], ["Methyl Phenylacetate", 3.29967], ["Methyl Phenylacetate", 3.29835],
+        ["Isoprene", 3.29993], ["Isoprene", 3.29967], ["Isoprene", 3.29834],
+        ["1,2-Dimethylbenzene", 3.29993], ["1,2-Dimethylbenzene", 3.29967], ["1,2-Dimethylbenzene", 3.29834],
+        ["2-Methylpyridine", 3.29993], ["2-Methylpyridine", 3.29967], ["2-Methylpyridine", 3.29834],
+        ["Ethanol", 3.29993], ["Ethanol", 3.29967], ["Ethanol", 3.29822]
     ]
-    df_raw = pd.DataFrame(raw_data, columns=['VOC', 'MOF', 'Beta', 'Voltage'])
+    df_raw = pd.DataFrame(raw_data, columns=['VOC', 'Voltage'])
     
-    # Simulating standard variation for robust machine learning prediction
     np.random.seed(42)
     simulated_patients = []
     for _, row in df_raw.iterrows():
@@ -44,13 +41,9 @@ def train_voc_model():
         base_voltage = row['Voltage']
         for i in range(100):
             v_uio = np.random.normal(base_voltage, 0.000015)
-            simulated_patients.append({
-                'V_UiO66': round(v_uio, 5),
-                'VOC_Gas': voc
-            })
+            simulated_patients.append({'V_UiO66': round(v_uio, 5), 'VOC_Gas': voc})
+            
     df_patients = pd.DataFrame(simulated_patients)
-    
-    # Single feature matrix (ZIF-8 is completely removed)
     X = df_patients[['V_UiO66']]
     y = df_patients['VOC_Gas']
     
@@ -61,28 +54,37 @@ def train_voc_model():
 ai_model = train_voc_model()
 tbc_biomarkers = ['Methyl Nicotinate', 'Methyl Phenylacetate']
 
-# 3. WEB USER INTERFACE (GUI)
-st.title("🔬 VOC Analysis & TB Diagnosis - E-Nose")
-st.markdown("An interactive web application utilizing a **single MOF UiO-66 sensor** to detect specific Volatile Organic Compounds (*VOC*) and determine clinical TB status.")
+# 3. HEADER SECTION
+st.image("https://img.icons8.com/external-flatart-icons-flat-flatarticons/128/external-medical-biotechnology-flatart-icons-flat-flatarticons.png", width=75)
+st.title("Electronic Nose Analysis System")
+st.caption("Advanced Respiratory Diagnostics utilizing AI & Single MOF UiO-66 Nanomaterial Sensor")
 st.write("---")
 
-st.subheader("📋 Input Patient Sensor Data")
-col1, col2 = st.columns(2)
-with col1:
-    nama_pasien = st.text_input("Patient Name / ID", value="Patient #01")
-with col2:
-    st.text_input("Sensitivity Condition", value="Beta = 5.0 (Optimal)", disabled=True)
-
-# Single input component for the UiO-66 voltage signal
-v_uio_input = st.number_input("Sensor Voltage MOF UiO-66 (V)", min_value=3.29000, max_value=3.30000, value=3.29834, format="%.5f", step=0.00001)
+# 4. PATIENT INPUT CARD (Beta removed entirely)
+with st.container():
+    st.subheader("📋 Patient & Sensor Data Input")
+    
+    nama_pasien = st.text_input("Patient Full Name / ID", value="Patient #01", help="Enter patient identification code or full name")
+    
+    # Large and easy to use voltage numeric field
+    v_uio_input = st.number_input(
+        "Sensor Voltage MOF UiO-66 (V)", 
+        min_value=3.29000, 
+        max_value=3.30000, 
+        value=3.29834, 
+        format="%.5f", 
+        step=0.00001,
+        help="Input the raw voltage data read from the E-Nose hardware system."
+    )
 
 st.write("")
-tombol_uji = st.button("🔴 Run AI Gas Analysis", type="primary", use_container_width=True)
+tombol_uji = st.button("🚀 Run Intelligent Gas Classification", type="primary")
 
-# 4. PREDICTION PROCESS & DISPLAY RESULTS
+# 5. DIAGNOSTICS & GRAPHICAL RESULTS
 if tombol_uji:
     input_data = pd.DataFrame([[v_uio_input]], columns=['V_UiO66'])
     
+    # AI Predictions
     gas_terdeteksi = ai_model.predict(input_data)[0]
     probabilitas_semua = ai_model.predict_proba(input_data)[0]
     daftar_gas = ai_model.classes_
@@ -91,29 +93,43 @@ if tombol_uji:
     persentase_gas = probabilitas_semua[idx_gas] * 100
     
     is_tbc = gas_terdeteksi in tbc_biomarkers
-    status_tbc = "TB POSITIVE" if is_tbc else "TB NEGATIVE (Healthy / Other Substance)"
+    status_tbc = "TB POSITIVE" if is_tbc else "TB NEGATIVE (Healthy / Non-Biomarker)"
 
     st.write("---")
-    st.subheader(f"📊 Analysis Results: {nama_pasien}")
+    st.subheader(f"📊 Diagnostic Reports Summary: {nama_pasien}")
     
-    c1, c2 = st.columns(2)
-    with c1:
-        st.metric(label="Detected VOC Type", value=gas_terdeteksi)
-    with c2:
-        st.metric(label="AI Confidence Level", value=f"{persentase_gas:.2f}%")
+    # Modern Metric Row
+    col_m1, col_m2 = st.columns(2)
+    with col_m1:
+        st.metric(label="Predicted Gas Molecule", value=gas_terdeteksi)
+    with col_m2:
+        st.metric(label="AI Diagnostic Confidence", value=f"{persentase_gas:.2f}%")
         
-    st.write("### Clinical Diagnosis Conclusion:")
+    # Clinical Status Banner
+    st.markdown("### Clinical Assessment:")
     if is_tbc:
-        st.error(f"⚠️ **PATIENT STATUS: {status_tbc}**")
-        st.markdown(f"The detected gas **{gas_terdeteksi}** is identified as an active biomarker for *Mycobacterium tuberculosis* infection in the breath sample.")
+        st.error(f"⚠️ **DIAGNOSIS STATUS: {status_tbc}**")
+        st.info(f"💡 **Medical Note:** The identified compound (**{gas_terdeteksi}**) acts as an active organic breath biomarker for *Mycobacterium tuberculosis* bacteria.")
     else:
-        st.success(f"✅ **PATIENT STATUS: {status_tbc}**")
-        st.markdown(f"The detected gas **{gas_terdeteksi}** does not indicate any clinical signs of active Pulmonary Tuberculosis.")
+        st.success(f"✅ **DIAGNOSIS STATUS: {status_tbc}**")
+        st.info(f"💡 **Medical Note:** The identified compound (**{gas_terdeteksi}**) does not align with typical clinical TB indicators. Patient is classified as non-infected.")
         
+    # Beautiful Data Analytics Breakdown with a bar chart
     st.write("---")
-    st.write("🔬 **Gas Spectrum Analysis Breakdown (Probabilities):**")
-    df_prob = pd.DataFrame({
-        'VOC Compound Type': daftar_gas,
-        'Signal Similarity (%)': [f"{p*100:.2f}%" for p in probabilitas_semua]
-    }).sort_values(by='Signal Similarity (%)', ascending=False)
-    st.table(df_prob)
+    st.write("📈 **AI Probability Spectrum Distribution:**")
+    
+    df_chart = pd.DataFrame({
+        'VOC Compound': daftar_gas,
+        'Similarity Probability (%)': probabilitas_semua * 100
+    }).sort_values(by='Similarity Probability (%)', ascending=True)
+    
+    # Horizontal Bar Chart for better data visual aesthetics
+    st.bar_chart(data=df_chart, x='VOC Compound', y='Similarity Probability (%)', horizontal=True, color="#2563EB")
+    
+    # Clean Reference Table below the chart
+    with st.expander("👁️ View Full Detailed Data Table"):
+        df_prob = pd.DataFrame({
+            'VOC Compound Type': daftar_gas,
+            'Signal Match Rate': [f"{p*100:.2f}%" for p in probabilitas_semua]
+        }).sort_values(by='Signal Match Rate', ascending=False).reset_index(drop=True)
+        st.table(df_prob)
