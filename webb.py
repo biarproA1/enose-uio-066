@@ -64,7 +64,7 @@ st.caption("Integrating Biocomputational MOF Design with IoT Cloud Telemetry")
 st.write("---")
 
 # 4. DHT SENSOR MONITORING PANEL
-st.subheader("🌡️ Instrument Environment Monitor (DHT Sensor)")
+st.subheader("🌡️ Instrument Environment Monitor")
 st.markdown("Real-time telemetry tracking of the internal chamber conditions.")
 
 col_dht1, col_dht2 = st.columns(2)
