@@ -5,7 +5,7 @@ from sklearn.ensemble import RandomForestClassifier
 
 # 1. PAGE CONFIGURATION & THEME
 st.set_page_config(
-    page_title="E-Nose Medical Diagnostics",
+    page_title="Smart e-Nose for TB Screening",
     page_icon="🔬",
     layout="centered",
     initial_sidebar_state="collapsed"
@@ -55,26 +55,24 @@ def train_voc_model():
 ai_model = train_voc_model()
 tbc_biomarkers = ['Methyl Nicotinate', 'Methyl Phenylacetate']
 
-# 3. HEADER SECTION
+# =====================================================================
+# 3. NEW UPDATED HEADER SECTION (Based on Your Title)
+# =====================================================================
 st.image("https://img.icons8.com/external-flatart-icons-flat-flatarticons/128/external-medical-biotechnology-flatart-icons-flat-flatarticons.png", width=75)
-st.title("Electronic Nose Analysis System")
-st.caption("Advanced Respiratory Diagnostics utilizing AI & Single MOF UiO-66 Nanomaterial Sensor")
+st.title("Smart e-Nose for TB Screening")
+st.caption("Integrating Biocomputational MOF Design with IoT Cloud Telemetry")
 st.write("---")
 
-# =====================================================================
-# 4. NEW FEATURE: DHT SENSOR MONITORING PANEL (PLACED AT THE TOP)
-# =====================================================================
+# 4. DHT SENSOR MONITORING PANEL
 st.subheader("🌡️ Instrument Environment Monitor (DHT Sensor)")
 st.markdown("Real-time telemetry tracking of the internal chamber conditions.")
 
-# Simulation sliders for presentation/testing purposes
 col_dht1, col_dht2 = st.columns(2)
 with col_dht1:
     suhu = st.slider("Simulate Chamber Temperature (°C)", min_value=15.0, max_value=50.0, value=27.5, step=0.1)
 with col_dht2:
     kelembapan = st.slider("Simulate Chamber Humidity (%RH)", min_value=10.0, max_value=95.0, value=45.0, step=0.5)
 
-# Visual Display Box for DHT Output
 with st.container(border=True):
     c_m1, c_m2, c_m3 = st.columns(3)
     with c_m1:
@@ -82,7 +80,6 @@ with st.container(border=True):
     with c_m2:
         st.metric(label="Chamber Humidity", value=f"{kelembapan}% RH")
     with c_m3:
-        # Simple threshold alert rule for presentation logic
         if 20.0 <= suhu <= 35.0 and 30.0 <= kelembapan <= 60.0:
             st.metric(label="Chamber Status", value="🟢 OPTIMAL")
         else:
