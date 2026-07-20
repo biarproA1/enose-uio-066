@@ -16,8 +16,9 @@ st.markdown("""
 <style>
     .main { background-color: #f8f9fa; }
     .stButton>button { width: 100%; border-radius: 8px; height: 3em; font-weight: bold; }
-    div[data-testid="stMetricValue"] { font-size: 28px; font-weight: bold; color: #1E3A8A; }
+    div[data-testid="stMetricValue"] { font-size: 26px; font-weight: bold; }
     .reportview-container .main .block-container{ max-width: 650px; }
+    .css-1r6il0r { background-color: #f1f5f9; padding: 15px; border-radius: 10px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -60,13 +61,41 @@ st.title("Electronic Nose Analysis System")
 st.caption("Advanced Respiratory Diagnostics utilizing AI & Single MOF UiO-66 Nanomaterial Sensor")
 st.write("---")
 
-# 4. PATIENT INPUT CARD (Beta removed entirely)
+# =====================================================================
+# 4. NEW FEATURE: DHT SENSOR MONITORING PANEL (PLACED AT THE TOP)
+# =====================================================================
+st.subheader("🌡️ Instrument Environment Monitor (DHT Sensor)")
+st.markdown("Real-time telemetry tracking of the internal chamber conditions.")
+
+# Simulation sliders for presentation/testing purposes
+col_dht1, col_dht2 = st.columns(2)
+with col_dht1:
+    suhu = st.slider("Simulate Chamber Temperature (°C)", min_value=15.0, max_value=50.0, value=27.5, step=0.1)
+with col_dht2:
+    kelembapan = st.slider("Simulate Chamber Humidity (%RH)", min_value=10.0, max_value=95.0, value=45.0, step=0.5)
+
+# Visual Display Box for DHT Output
+with st.container(border=True):
+    c_m1, c_m2, c_m3 = st.columns(3)
+    with c_m1:
+        st.metric(label="Chamber Temp", value=f"{suhu}°C")
+    with c_m2:
+        st.metric(label="Chamber Humidity", value=f"{kelembapan}% RH")
+    with c_m3:
+        # Simple threshold alert rule for presentation logic
+        if 20.0 <= suhu <= 35.0 and 30.0 <= kelembapan <= 60.0:
+            st.metric(label="Chamber Status", value="🟢 OPTIMAL")
+        else:
+            st.metric(label="Chamber Status", value="⚠️ STABILIZING")
+
+st.write("---")
+
+# 5. PATIENT INPUT CARD
 with st.container():
     st.subheader("📋 Patient & Sensor Data Input")
     
     nama_pasien = st.text_input("Patient Full Name / ID", value="Patient #01", help="Enter patient identification code or full name")
     
-    # Large and easy to use voltage numeric field
     v_uio_input = st.number_input(
         "Sensor Voltage MOF UiO-66 (V)", 
         min_value=3.29000, 
@@ -80,7 +109,7 @@ with st.container():
 st.write("")
 tombol_uji = st.button("🚀 Run Intelligent Gas Classification", type="primary")
 
-# 5. DIAGNOSTICS & GRAPHICAL RESULTS
+# 6. DIAGNOSTICS & GRAPHICAL RESULTS
 if tombol_uji:
     input_data = pd.DataFrame([[v_uio_input]], columns=['V_UiO66'])
     
@@ -123,24 +152,18 @@ if tombol_uji:
         'Similarity Probability (%)': probabilitas_semua * 100
     }).sort_values(by='Similarity Probability (%)', ascending=True)
     
-    # Horizontal Bar Chart for better data visual aesthetics
     st.bar_chart(data=df_chart, x='VOC Compound', y='Similarity Probability (%)', horizontal=True, color="#2563EB")
     
     # Structured Data Table shown directly to the user
     st.write("### 📋 Detailed Signal Analysis Report")
     
-    # Create and sort dataframe based on highest probability
     df_prob = pd.DataFrame({
         'VOC Compound Type': daftar_gas,
         'Signal Match Rate': probabilitas_semua * 100
     }).sort_values(by='Signal Match Rate', ascending=False).reset_index(drop=True)
     
-    # Format to look like standard table percentages
     df_prob['Signal Match Rate'] = df_prob['Signal Match Rate'].map("{:.2f}%".format)
-    
-    # Add a standard index counter starting from 1 instead of 0
     df_prob.index = df_prob.index + 1
     df_prob.index.name = 'No.'
     
-    # Render the formal data table
     st.table(df_prob)
